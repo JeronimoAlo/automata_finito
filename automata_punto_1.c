@@ -1,97 +1,122 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 
-// Función para determinar si el caracter es un número decimal.
-int esDecimal(const char *str) {
-    int i = 0;
-
-    if (str[0] == '+' || str[0] == '-') i++; // Permitimos el signo y avanzamos en una unidad.
-
-    for (; str[i] != '\0'; i++) {
-        if (!isdigit(str[i])) return 0; // Si no es dígito, no es decimal.
-    }
-    return 1;
-}
-
-// Función para determinar si el caracter es un número octal.
-int esOctal(const char *str) {
-    if (str[0] != '0') return 0; // Los octales empiezan con 0 (Para diferenciarlos del hexadecimal).
-    
-    for (int i = 1; str[i] != '\0'; i++) {
-        if (str[i] < '0' || str[i] > '7') return 0; // Verificamos si es dígito octal.
-    }
-    return 1;
-}
-
-// Función para determinar si el caracter es un número hexadecimal.
-int esHexadecimal(const char *str) {
-    if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) { // Si empieza con 0x o 0X es hexadecimal.
-        for (int i = 2; str[i] != '\0'; i++) {
-            if (!isxdigit(str[i])) return 0; // Verifica si es un dígito hexadecimal.
-        }
-        return 1;
-    }
-    return 0;
-}
-
-// Función principal para procesar la cadena.
-void procesarCadena(const char *cadena) {
-    int decimales = 0, octales = 0, hexadecimales = 0, errores = 0; // Inicializamos los contadores para devolver en el resumen final.
-    char *token; // Variable para almacenar los caracteres a analizar en la iteración del while.
-    char cadena_copia[256]; // Copiamos la cadena de entrada antes de modificarla.
-    
-    // Copia la cadena para usar strtok posteriormente. Esto lo hacemos ya que la función strtok modifica la cadena al dividirla en fragmentos.
-    strncpy(cadena_copia, cadena, sizeof(cadena_copia));
-
-    // Separamos la cadena por el delimitador #:
-    token = strtok(cadena_copia, "#"); // Nos permite separar la cadena_copia en subcadenas tomando como separador el #.
-    
-    while (token != NULL) { // Mientras tengamos más caracteres para leer, continuamos analizando el token.
-        if (esDecimal(token)) {
-            printf("Decimal encontrado: %s\n", token); // Si el valor encontrado es un decimal, lo informamos por pantalla.
-            decimales++; // Sumamos en el contador para el resumen.
-        } else if (esOctal(token)) {
-            printf("Octal encontrado: %s\n", token); // Si el valor encontrado es un octal, lo informamos por pantalla.
-            octales++; // Sumamos en el contador para el resumen.
-        } else if (esHexadecimal(token)) {
-            printf("Hexadecimal encontrado: %s\n", token); // Si el valor encontrado es un hexadecimal, lo informamos por pantalla.
-            hexadecimales++; // Sumamos en el contador para el resumen.
-        } else {
-            printf("Error lexico encontrado: %s\n", token); // Si el valor encontrado es un error, lo informamos por pantalla.
-            errores++; // Sumamos en el contador para el resumen.
-        }
-        // Obtenemos el siguiente token.
-        token = strtok(NULL, "#"); // Si pasamos NULL cómo parámetro le indicamos que continue por donde se quedó en la anterior llamada a la función strtok.
-    }
-
-    printf("Resumen:\n");
-    printf("- Cantidad de decimales: %d\n", decimales);
-    printf("- Cantidad de octales: %d\n", octales);
-    printf("- Cantidad de hexadecimales: %d\n", hexadecimales);
-    printf("- Cantidad de errores lexicos: %d\n", errores);
-}
-
-// Función que recibe un carácter numérico y retorna un número entero.
-int charToNum(char c) {
-    if (isdigit(c)) { // Valida que sea un dígito.
-        return c - '0';  // Convierte el carácter numérico en su valor entero: En ASCII el 0 representa el 48 y todos los demás números son consecutivos por lo tanto si los restamos conseguimos el entero asociado.
-    } else {
-        printf("Error: '%c' no es un dígito.\n", c);
-        return -1;  // Retorna -1 en caso de error
-    }
-}
-
+// Declaro los prototipos de las funciones.
+int verifica(char* s);  
+int esPalabra(char* s, int* decimales, int* octales, int* hexadecimales);
+int columna(int c);
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) { // argc contiene la cantidad de argumentos pasados al programa por línea de comandos.
-        printf("Debe ingresar una unica cadena por linea de comandos."); // Se deben pasar 2 parámetros, la ruta del .exe y la cadena a analizar con el autómata.
+    // Verificamos si se pasó la cadena como argumento por CLI.
+    if (argc < 2) {
+        printf("Por favor ingrese la cadena a analizar como argumento.\n");
         return 1;
     }
-    
-    // Procesar la cadena ingresada por línea de comandos.
-    procesarCadena(argv[1]);
+
+    char* cadena = argv[1];  // Tomamos la cadena de entrada desde la consola.
+
+    // Verificamos si la cadena contiene caracteres inválidos (alfabeto incorrecto).
+    if (verifica(cadena)) {
+        printf("Hay caracteres que no pertenecen al alfabeto.\n");
+        return 1;
+    }
+
+    // Contadores para cada grupo de constantes inicializadas en 0.
+    int decimales = 0, octales = 0, hexadecimales = 0;
+
+    // Verificamos si la cadena pertenece al lenguaje, contando cada tipo de constante durante la detección.
+    if (esPalabra(cadena, &decimales, &octales, &hexadecimales)) {
+        printf("Es palabra del lenguaje.\n");
+        printf("Cantidad de constantes decimales: %d\n", decimales);
+        printf("Cantidad de constantes octales: %d\n", octales);
+        printf("Cantidad de constantes hexadecimales: %d\n", hexadecimales);
+    }
+    else {
+        printf("No pertenece al lenguaje.\n");
+    }
 
     return 0; // Fin de programa.
+}
+
+// Función que verifica si la cadena tiene caracteres no permitidos.
+int verifica(char* cadena) {
+    int i;
+
+    // Recorremos cada carácter de la cadena.
+    for (i = 0; cadena[i]; i++) {
+        // Verificamos si el carácter no es '+', '-', '#', un dígito (Del 0 al 9) o un carácter válido para hexadecimales (A-F o a-f o x,X).
+        if (!(cadena[i] == '+' || cadena[i] == '-' || cadena[i] == '#' || isdigit(cadena[i]) || (cadena[i] >= 'A' && cadena[i] <= 'F') ||
+              (cadena[i] >= 'a' && cadena[i] <= 'f') || cadena[i] == 'x' || cadena[i] == 'X')) {
+            return 1;  // Retornamos 1 si hay caracteres inválidos.
+        }
+    }
+
+    return 0;  // Retornamos 0 si no hay caracteres inválidos.
+}
+
+// Función que implementa el autómata y valida la cadena, además de contar los tipos de constantes.
+int esPalabra(char* cadena, int* decimales, int* octales, int* hexadecimales) {
+    // Tabla de transiciones del autómata.
+    static int tt[7][8] = {
+        // '+'  '-'  '#'  '0' [1-9]  [0-7]  [0-9A-Fa-f] 'x,X'
+        { 1,   1,   0,   2,    3,     6,    6,   6 },  // Estado A (inicial) lo representamos con un 0.
+        { 6,   6,   6,   3,    3,     3,    6,   6 },  // Estado B (después de un signo) lo representamos con un 1.
+        { 6,   6,   6,   4,    6,     4,    6,   5 },  // Estado D (después de un '0') lo representamos con un 2.
+        { 6,   6,   0,   3,    3,     3,    6,   6 },  // Estado C (número decimal) lo representamos con un 3.
+        { 6,   6,   0,   4,    6,     4,    6,   6 },  // Estado F (número octal) lo representamos con un 4.
+        { 6,   6,   0,   6,    6,     6,    5,   6 },  // Estado E (número hexadecimal) lo representamos con un 5.
+        { 6,   6,   6,   6,    6,     6,    6,   6 }   // Estado G (rechazo) lo representamos con un 6.
+    };
+
+    int estado = 0;  // Estado inicial (A). Se va a ir actualizando dentro del while.
+    int i = 0;       // Índice para recorrer la cadena.
+    int c = cadena[0];  // Primer carácter de la cadena.
+    int actualTipo = -1;  // Para contar el tipo actual de constante (-1 si no hay constante actual).
+
+    // Recorremos la cadena mientras no lleguemos al final,
+    while (c != '\0') {
+        // Actualizamos el estado del autómata usando la tabla de transiciones.
+        estado = tt[estado][columna(c)];
+
+        // Si llegamos al final de una constante (al leer '#'), aumentamos el contador adecuado.
+        if (c == '#') {
+            if (actualTipo == 3) (*decimales)++;      // Si era decimal.
+            else if (actualTipo == 4) (*octales)++;   // Si era octal.
+            else if (actualTipo == 6) (*hexadecimales)++;  // Si era hexadecimal.
+            actualTipo = -1;  // Reiniciamos el tipo actual de constante.
+        }
+        else {
+            actualTipo = estado;  // Guardamos el tipo de la constante actual.
+        }
+
+        c = cadena[++i];  // Avanzamos al siguiente carácter.
+    }
+
+    // Verificamos si terminamos en un estado de aceptación (3: decimal, 4: octal, 6: hexadecimal).
+    if (estado == 3 || estado == 4 || estado == 6) {
+        // Contamos la última constante en caso de no haber otro '#'.
+        if (actualTipo == 3) (*decimales)++;
+        else if (actualTipo == 4) (*octales)++;
+        else if (actualTipo == 6) (*hexadecimales)++;
+        return 1;  // La cadena es válida.
+    }
+    else {
+        return 0;  // La cadena no es válida.
+    }
+}
+
+// Función que asigna la columna correspondiente en la tabla de transiciones.
+int columna(int c) {
+    // Identificamos la columna de la tabla según el carácter,
+    if (c == '+') return 0;   // Columna para '+'.
+    if (c == '-') return 1;   // Columna para '-'.
+    if (c == '#') return 2;   // Columna para '#'.
+    if (c == '0') return 3;   // Columna para '0'.
+    if (c >= '1' && c <= '9') return 4;  // Columna para dígitos [1-9].
+    if (c >= '0' && c <= '7') return 5;  // Columna para dígitos octales [0-7].
+    if ((c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) return 6;  // Columna para hexadecimales.
+    if (c == 'x' || c == 'X') return 7;  // Columna para 'x' o 'X' (hexadecimal).
+
+    return -1;  // Si el carácter no pertenece al alfabeto, retornamos -1.
 }

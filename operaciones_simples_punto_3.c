@@ -9,7 +9,7 @@ int charToNum(char c) {
         return c - '0';  // Convierte el carácter numérico en su valor entero: En ASCII el 0 representa el 48 y todos los demás números son consecutivos por lo tanto si los restamos conseguimos el entero asociado.
     } else {
         printf("Error: '%c' no es un digito.\n", c);
-        return -1;  // Retorna -1 en caso de error
+        return -1;  // Retorna -1 en caso de error.
     }
 }
 
@@ -18,17 +18,17 @@ int charToNum(char c) {
 int evaluarExpresion(const char* expresion) {
     int resultado = 0;
     int valorActual = 0;
-    char operacion = '+';  // Comienza con una suma
+    char operacion = '+';  // Comienza con una suma.
 
     for (int i = 0; expresion[i] != '\0'; i++) {
         char c = expresion[i];
 
-        // Si es un dígito, lo convertimos a número
+        // Si es un dígito, lo convertimos a número.
         if (isdigit(c)) {
-            valorActual = valorActual * 10 + charToNum(c);  // Para manejar números de más de 1 dígito
+            valorActual = valorActual * 10 + charToNum(c);  // Para manejar números de más de 1 dígito.
         }
 
-        // Si encontramos un operador o es el final de la cadena, ejecutamos la operación
+        // Si encontramos un operador o es el final de la cadena, ejecutamos la operación.
         if (!isdigit(c) && !isspace(c) || expresion[i + 1] == '\0') {
             switch (operacion) {
                 case '+': resultado += valorActual; break;
@@ -36,8 +36,8 @@ int evaluarExpresion(const char* expresion) {
                 case '*': resultado *= valorActual; break;
                 case '/': resultado /= valorActual; break;
             }
-            operacion = c;  // Guardamos el siguiente operador
-            valorActual = 0;  // Reiniciamos el valor para el próximo número
+            operacion = c;  // Guardamos el siguiente operador.
+            valorActual = 0;  // Reiniciamos el valor para el próximo número.
         }
     }
 
@@ -50,13 +50,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Obtenemos la expresión de la línea de comandos
+    // Obtenemos la expresión de la línea de comandos.
     char* expresion = argv[1];
 
-    // Evaluamos la expresión
+    // Evaluamos la expresión.
     int resultado = evaluarExpresion(expresion);
 
-    // Mostramos el resultado
+    // Mostramos el resultado.
     printf("El resultado de la expresión '%s' es: %d\n", expresion, resultado);
 
     return 0;
