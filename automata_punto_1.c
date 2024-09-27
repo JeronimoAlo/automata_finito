@@ -84,7 +84,7 @@ int esPalabra(char* cadena, int* decimales, int* octales, int* hexadecimales) {
             if (actualTipo == 3) (*decimales)++;      // Si era decimal.
             else if (actualTipo == 4) (*octales)++;   // Si era octal.
             else if (actualTipo == 5) (*hexadecimales)++;  // Si era hexadecimal.
-            printf("%d", c); //BORRAR.
+            
             actualTipo = -1;  // Reiniciamos el tipo actual de constante.
         }
         else {
@@ -95,7 +95,6 @@ int esPalabra(char* cadena, int* decimales, int* octales, int* hexadecimales) {
     }
 
     // Verificamos si terminamos en un estado de aceptación (3: decimal, 4: octal, 5: hexadecimal).
-    printf("Llegue al final %d\n", estado); //BORRAR.
     if (estado == 3 || estado == 4 || estado == 5) {
         // Contamos la última constante en caso de no haber otro '#'.
         if (actualTipo == 3) (*decimales)++;
