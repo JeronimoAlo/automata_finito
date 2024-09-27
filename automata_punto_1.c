@@ -59,14 +59,14 @@ int verifica(char* cadena) {
 int esPalabra(char* cadena, int* decimales, int* octales, int* hexadecimales) {
     // Tabla de transiciones del autómata.
     static int tt[7][8] = {
-        // '+'  '-'  '#'  '0' [1-9]  [0-7]  [0-9A-Fa-f] 'x,X'
-        { 1,   1,   0,   2,    3,     6,    6,   6 },  // Estado A (inicial) lo representamos con un 0.
-        { 6,   6,   6,   3,    3,     3,    6,   6 },  // Estado B (después de un signo) lo representamos con un 1.
-        { 6,   6,   6,   4,    6,     4,    6,   5 },  // Estado D (después de un '0') lo representamos con un 2.
-        { 6,   6,   0,   3,    3,     3,    6,   6 },  // Estado C (número decimal) lo representamos con un 3.
-        { 6,   6,   0,   4,    6,     4,    6,   6 },  // Estado F (número octal) lo representamos con un 4.
-        { 6,   6,   0,   6,    6,     6,    5,   6 },  // Estado E (número hexadecimal) lo representamos con un 5.
-        { 6,   6,   6,   6,    6,     6,    6,   6 }   // Estado G (rechazo) lo representamos con un 6.
+    //   '+'  '-'  '#'  '0'  [1-7] [1-9] [A-Fa-f] 'x,X'
+        { 1,   1,   0,   2,    3,     3,    6,   6 },  // Estado A (inicial) 0
+        { 6,   6,   6,   6,    3,     3,    6,   6 },  // Estado B (después de un signo) 1
+        { 6,   6,   6,   4,    4,     6,    6,   5 },  // Estado D (después de un '0') 2
+        { 6,   6,   0,   3,    3,     3,    6,   6 },  // Estado C (número decimal) 3
+        { 6,   6,   0,   4,    4,     6,    6,   6 },  // Estado F (número octal) 4
+        { 6,   6,   0,   6,    5,     5,    5,   6 },  // Estado E (número hexadecimal) 5
+        { 6,   6,   6,   6,    6,     6,    6,   6 }   // Estado G (rechazo) 6
     };
 
     int estado = 0;  // Estado inicial (A). Se va a ir actualizando dentro del while.
@@ -83,7 +83,8 @@ int esPalabra(char* cadena, int* decimales, int* octales, int* hexadecimales) {
         if (c == '#') {
             if (actualTipo == 3) (*decimales)++;      // Si era decimal.
             else if (actualTipo == 4) (*octales)++;   // Si era octal.
-            else if (actualTipo == 6) (*hexadecimales)++;  // Si era hexadecimal.
+            else if (actualTipo == 5) (*hexadecimales)++;  // Si era hexadecimal.
+            printf("%d", c); //BORRAR.
             actualTipo = -1;  // Reiniciamos el tipo actual de constante.
         }
         else {
@@ -93,12 +94,13 @@ int esPalabra(char* cadena, int* decimales, int* octales, int* hexadecimales) {
         c = cadena[++i];  // Avanzamos al siguiente carácter.
     }
 
-    // Verificamos si terminamos en un estado de aceptación (3: decimal, 4: octal, 6: hexadecimal).
-    if (estado == 3 || estado == 4 || estado == 6) {
+    // Verificamos si terminamos en un estado de aceptación (3: decimal, 4: octal, 5: hexadecimal).
+    printf("Llegue al final %d\n", estado); //BORRAR.
+    if (estado == 3 || estado == 4 || estado == 5) {
         // Contamos la última constante en caso de no haber otro '#'.
         if (actualTipo == 3) (*decimales)++;
         else if (actualTipo == 4) (*octales)++;
-        else if (actualTipo == 6) (*hexadecimales)++;
+        else if (actualTipo == 5) (*hexadecimales)++;
         return 1;  // La cadena es válida.
     }
     else {
@@ -113,8 +115,8 @@ int columna(int c) {
     if (c == '-') return 1;   // Columna para '-'.
     if (c == '#') return 2;   // Columna para '#'.
     if (c == '0') return 3;   // Columna para '0'.
-    if (c >= '1' && c <= '9') return 4;  // Columna para dígitos [1-9].
-    if (c >= '0' && c <= '7') return 5;  // Columna para dígitos octales [0-7].
+    if (c >= '1' && c <= '7') return 4;  // Columna para dígitos [0-7].
+    if (c >= '1' && c <= '9') return 5;  // Columna para dígitos octales [1-9].
     if ((c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) return 6;  // Columna para hexadecimales.
     if (c == 'x' || c == 'X') return 7;  // Columna para 'x' o 'X' (hexadecimal).
 

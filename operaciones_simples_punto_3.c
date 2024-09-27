@@ -13,7 +13,6 @@ int charToNum(char c) {
     }
 }
 
-
 // Función para evaluar una expresión con +, -, *, /
 int evaluarExpresion(const char* expresion) {
     int resultado = 0;
